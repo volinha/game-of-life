@@ -1,34 +1,49 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Conway's Game of Life
 
-## Getting Started
+Basic recreation of Conway's Game of Life in NextJS13 + TailwindCSS.
 
-First, run the development server:
+## How to
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+$ git clone https://github.com/volinha/game-of-life
+$ cd game-of-life
+$ npm install
+$ npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Screenshots
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+<p align="center" style="display: flex; align-items: flex-start; justify-content: center;">
+  <img src="public/glider-gun.gif" width="800px"/>
+</p>
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+<p align="center" style="display: flex; align-items: flex-start; justify-content: center;">
+  <img src="public/pentadec.gif" width="800px"/>
+</p>
 
-## Learn More
+<p align="center" style="display: flex; align-items: flex-start; justify-content: center;">
+  <img src="public/creating-grids.gif" width="800px"/>
+</p>
 
-To learn more about Next.js, take a look at the following resources:
+** You can edit the cells by clicking on it! **
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Techs
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- [NextJS](nextjs.org)
+- [TailwindCSS](https://tailwindcss.com)
+- [Visual Studio Code](https://code.visualstudio.com)
 
-## Deploy on Vercel
+## Future Updates
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- [ ] More Responsivity
+- [ ] Save designs
+- [ ] Theme changer
+- [ ] More known designs
+#
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+#### 💻 developed with 💖 by Vinícius Fernandes
+[<img src = "https://img.shields.io/badge/facebook-%231877F2.svg?&style=for-the-badge&logo=facebook&logoColor=white">](https://www.facebook.com/viniciusfvb)
+[<img src="https://img.shields.io/badge/linkedin-%230077B5.svg?&style=for-the-badge&logo=linkedin&logoColor=white" />](https://www.linkedin.com/in/viniciusfernandesdev/)
+[<img src="https://img.shields.io/badge/twitter-%231DA1F2.svg?&style=for-the-badge&logo=twitter&logoColor=white" />](https://twitter.com/volafernandes)
+<a href = "mailto:viniciusfernandesdev@gmail.com"><img src="https://img.shields.io/badge/-Gmail-%23333?style=for-the-badge&logo=gmail&logoColor=white" target="_blank"></a>
+<br />

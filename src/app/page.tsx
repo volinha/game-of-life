@@ -1,113 +1,199 @@
-import Image from 'next/image'
+"use client";
+import { useEffect, useState } from "react";
+import presets from '@/predefined.json'
+
+const { v4: uuidv4 } = require("uuid");
+let rows = 41;
+let cols = 41;
 
 export default function Home() {
+  const [grid, setGrid] = useState<number[][]>([]);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [speed, setSpeed] = useState<number>(50);
+  const [generations, setGenerations] = useState<number>(0);
+
+  function initializeGrid(){
+    const initialGrid = Array(rows)
+      .fill(0)
+      .map(() => Array(cols).fill(0));
+
+    initialGrid[7][9] = 1;
+    initialGrid[7][10] = 1;
+    initialGrid[8][9] = 1;
+    initialGrid[8][10] = 1;
+
+    initialGrid[9][7] = 1;
+    initialGrid[9][8] = 1;
+    initialGrid[9][9] = 1;
+    initialGrid[10][8] = 1;
+
+    setGrid(initialGrid);
+  };
+
+  function updateGrid(){
+    setGrid((prevGrid) => {
+      const newGrid = JSON.parse(JSON.stringify(prevGrid));
+
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          const neighbors = countNeighbors(prevGrid, i, j);
+
+          if (prevGrid[i][j] === 1) {
+            if (neighbors < 2 || neighbors > 3) {
+              newGrid[i][j] = 0; // Célula morre
+            }
+          } else {
+            if (neighbors === 3) {
+              newGrid[i][j] = 1; // Célula nasce
+            }
+          }
+        }
+      }
+      setGenerations((gen) => gen += 1);
+      return newGrid;
+    });
+  };
+
+  function countNeighbors(grid: Array<Array<number>>, x: number, y: number) {
+    let count = 0;
+    const directions = [
+      [-1, -1],
+      [-1, 0],
+      [-1, 1],
+      [0, -1],
+      [0, 1],
+      [1, -1],
+      [1, 0],
+      [1, 1],
+    ];
+
+    for (let i = 0; i < directions.length; i++) {
+      const [dx, dy] = directions[i];
+      const newX = x + dx;
+      const newY = y + dy;
+
+      if (newX >= 0 && newX < rows && newY >= 0 && newY < cols) { // Proteger dos limites do array
+        count += grid[newX][newY];
+      }
+    }
+    return count;
+  }
+
+  function changeValue(row: number, col: number) {
+    setIsRunning(false);
+
+    let newGrid = [...grid];
+
+    newGrid[row][col] === 0 ? (newGrid[row][col] = 1) : (newGrid[row][col] = 0);
+    setGrid(newGrid);
+  }
+
+  useEffect(() => {
+    initializeGrid();
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (isRunning) {
+      interval = setInterval(() => {
+        updateGrid();
+      }, speed);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRunning, speed]);
+
+  function handleToggleRunning(){
+    setIsRunning((prevIsRunning) => !prevIsRunning);
+  };
+
+function handleReset(){
+    setIsRunning(false);
+
+    let clearGrid = [...grid];
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        clearGrid[i][j] = 0;
+      }
+    }
+    setGenerations(0);
+    setGrid(clearGrid);
+  };
+
+  function handleSpeedChange(event: React.ChangeEvent<HTMLInputElement>){
+    setSpeed(Number(event.target.value));
+  };
+
+  function handlePattern (pattern: number){
+    setIsRunning(false);
+
+    if (pattern === 1) {
+      setGrid(presets.pulsar)
+    }
+    if (pattern === 2) {
+      setGrid(presets.pentadecathlon)
+    }
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className='flex flex-col h-screen items-center justify-center text-lg'>
+      <h1 className='text-3xl '>Conway&apos;s Game of Life</h1>
+      <div className='grid grid-cols-41 gap-0 max-w-fit'>
+        {grid.map((row, i) =>
+          row.map((cell, j) => (
+            <div
+              key={`${i * 41 + j}`}
+              onClick={(e) => changeValue(i, j)}
+              className={`w-5 h-5 aspect-square border text-xs  ${
+                cell === 0 ? "bg-black border-green-500" : "bg-green-500 border-black"
+              }`}></div>
+          ))
+        )}
+      </div>
+      <div className='flex flex-row items-center justify-center gap-2'>
+        <button
+          className='border border-green-500 w-24 h-12 p-1 m-1 rounded  hover:text-black hover:bg-green-500 transition'
+          onClick={() => handleToggleRunning()}>
+          {isRunning ? "Stop" : "Run"}
+        </button>
+        <button
+          className='border border-green-500 w-24 h-12 p-1 m-1 rounded  hover:text-black hover:bg-green-500 transition'
+          onClick={() => handleReset()}>
+          Reset
+        </button>
+        <div className='flex flex-col items-center justify-center '>
+          <span>Interval: {speed} ms</span>
+          <input
+            type='range'
+            min={50}
+            max={1000}
+            step={50}
+            value={speed}
+            onChange={handleSpeedChange}
+            className="cursor-pointer appearance-none bg-transparent [&::-webkit-slider-runnable-track]:rounded-none [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-[25px] [&::-webkit-slider-thumb]:w-[25px] [&::-webkit-slider-thumb]:rounded-none [&::-webkit-slider-thumb]:bg-green-500"
+          />
         </div>
+        <button
+        className='border border-green-500 w-24 h-12 p-1 m-1 rounded  hover:text-black hover:bg-green-500 transition'
+        onClick={() => handlePattern(1)}>
+          Pulsar
+      </button>
+        <button
+        className='border border-green-500 w-24 h-12 p-1 m-1 rounded  hover:text-black hover:bg-green-500 transition'
+        onClick={() => handlePattern(2)}>
+          Pentadec
+      </button>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      <h2>
+      Generations: {generations}
+        </h2>
     </main>
-  )
+  );
 }
+

@@ -2,7 +2,11 @@
 
 Basic recreation of Conway's Game of Life in NextJS13 + TailwindCSS.
 
-## How to
+## Live version
+
+[Conway's Game of Life](https://game-of-life-volinha.vercel.app)
+
+## How to use locally
 
 ```bash
 $ git clone https://github.com/volinha/game-of-life
